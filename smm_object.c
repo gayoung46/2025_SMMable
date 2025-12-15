@@ -30,7 +30,7 @@
 #define MAX_GRADE 13
 
 
-static char smmObj_nodeName[MAX_NODETYPE][MAX_CHARNAME] = {
+static const char smmObj_gradeName[SMMNODE_MAX_GRADE][MAX_CHARNAME] = {
        "A+",
        "A0",
        "A- ",
@@ -47,8 +47,8 @@ static char smmObj_nodeName[MAX_NODETYPE][MAX_CHARNAME] = {
      
 };
 
-static char smmObj_gradeName[MAX_GRADE][MAX_CHARNAME] = {
-       "letctur",
+static const char smmObj_typeName[MAX_NODETYPE][MAX_CHARNAME] = {
+       "letcture",
        "restautrant",
        "laboratory",
        "home",
@@ -121,7 +121,7 @@ int smmObj_getObjectCredit(void *ptr)
 char* smmObj_getTypeName(void *ptr)
 {
       smmObj_object_t* objptr = (smmObj_object_t*)ptr;
-      return (smmObj_nodeName[objptr->type]);
+      return (char*)smmObj_typeName[objptr->type];
 }
 
 int smmObj_getObjectGrade(void *ptr)
@@ -131,9 +131,14 @@ int smmObj_getObjectGrade(void *ptr)
 }
 
 
-#if 0
-char* smmObj_getGradeName(smmGrade_e grade)
+static const char *g_gradeStr[SMMNODE_MAX_GRADE] = 
 {
-    return smmGradeName[grade];
+    "A+","A0","A-","B+","B0","B-","C+","C0","C-","D+","D0","D-","F"
+};
+
+
+char* smmObj_getGradeName(int grade)
+{
+    if (grade < 0 || grade >= SMMNODE_MAX_GRADE) return "N/A";
+    return (char*)g_gradeStr[grade];
 }
-#endif

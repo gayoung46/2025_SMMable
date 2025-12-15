@@ -161,14 +161,27 @@ void generatePlayers(int n, int initEnergy)
 int rolldie(int player)
 {
     char c;
-    printf(" Press any key to roll a die (press g to see grade): ");
-    c = getchar();
-    fflush(stdin);
     
-#if 1
+    printf(" Press any key to roll a die (press g to see grade): ");
+    
+    c = getchar();
+    if (c == '\n') 
+    {
+        
+    } 
+    else 
+    {
+        
+        int ch;
+        while ((ch = getchar()) != '\n' && ch != EOF) {}
+
+    //fflush(stdin);
+    
+
     if (c == 'g')
         printGrades(player);
-#endif
+    }
+    
     
     return (rand()%MAX_DIE + 1);
 }
@@ -190,7 +203,8 @@ void actionNode(int player)
     switch(type)
     {
         case SMMNODE_TYPE_LECTURE:
-        if(findGrade(player,smmObj_getObjectName(ptr)) != NULL)
+        if(smm_players[player].energy >= energy && 
+            findGrade(player,smmObj_getObjectName(ptr))== NULL)
         {
              smm_players[player].credit += credit;
              smm_players[player].energy -= energy;
@@ -214,9 +228,11 @@ void actionNode(int player)
              
         case SMMNODE_TYPE_HOME:
              smm_players[player].energy += energy;
-             if(smm_players[player].credit<= GRADUATE_CREDIT)
+             
+             if(smm_players[player].credit >= GRADUATE_CREDIT)
              {
                   smm_players[player].flag_graduated = 1;
+                  printf(" %s graduated! (credit=%d)\n", smm_players[player].name, smm_players[player].credit);
              }  
              break;
              
@@ -224,10 +240,36 @@ void actionNode(int player)
              break;
              
         case SMMNODE_TYPE_FOODCHANCE:
+        {
+             int selectedCard;
+             void *foodPtr;
+             int gainEnergy;
+             
+             selectedCard = rand() % smm_food_nr;
+             foodPtr = smmdb_getData(LISTNO_FOODCARD, selectedCard);
+
+             gainEnergy = smmObj_getObjectEnergy(foodPtr);
+             smm_players[player].energy += gainEnergy;
+
+             printf("Food %s selected, energy %+d\n", smmObj_getObjectName(foodPtr), gainEnergy);
+             
              break;
+                            
+        }
              
         case SMMNODE_TYPE_FESTIVAL:
+        {
+             int selectedCard;
+             void *festPtr;
+             
+             selectedCard = rand() % smm_festival_nr;
+             festPtr = smmdb_getData(LISTNO_FESTCARD, selectedCard);
+
+             printf("Festival Mission\n");
+             printf("%s\n", smmObj_getObjectName(festPtr));
+             
              break;
+        }
 
         //case lecture:
         default:
@@ -266,16 +308,18 @@ int main(int argc, const char * argv[]) {
     while (fscanf(fp, "%s %i %i %i", name, &type, &credit, &energy) == 4 ) //read a node parameter set
     {
         //store the parameter set
-        void* ptr;
-        printf("%s %i %i %i\n", name, type, credit, energy);
-        ptr = smmObj_genObject(name, SMMNODE_OBJTYPE_BOARD, type, credit, energy, 0);
+        void* ptr = smmObj_genObject(name, SMMNODE_OBJTYPE_BOARD, type, credit, energy, 0);
         smm_board_nr = smmdb_addTail(LISTNO_NODE, ptr); 
+        
+        printf("%s %i %i %i\n", name, type, credit, energy);
     }
     fclose(fp);
+    
+    smm_board_nr = smmdb_len(LISTNO_NODE);
     printf("Total number of board nodes : %i\n", smm_board_nr);
     
     
-#if 0
+#if 1
     //2. food card config 
     if ((fp = fopen(FOODFILEPATH,"r")) == NULL)
     {
@@ -284,8 +328,16 @@ int main(int argc, const char * argv[]) {
     }
     
     printf("\n\nReading food card component......\n");
-    while () //read a food parameter set
+    while (fscanf(fp, "%s %i" , name, &energy) == 2) //read a food parameter set
     {
+             void* ptr;
+             printf("%s %i\n", name, energy);
+
+             ptr = smmObj_genObject(name, SMMNODE_OBJTYPE_FOOD, SMMNODE_TYPE_FOODCHANCE, 0, energy, 0);
+
+             smmdb_addTail(LISTNO_FOODCARD, ptr);
+             smm_food_nr++;
+          
         //store the parameter set
     }
     fclose(fp);
@@ -301,12 +353,22 @@ int main(int argc, const char * argv[]) {
     }
     
     printf("\n\nReading festival card component......\n");
-    while () //read a festival card string
+    while (fgets(name, MAX_CHARNAME, fp) != NULL) //read a festival card string
     {
+           void* ptr;
+           printf("%s\n", name);
+
+           ptr = smmObj_genObject(name, SMMNODE_OBJTYPE_FEST, SMMNODE_TYPE_FESTIVAL, 0, 0, 0);
+
+           smmdb_addTail(LISTNO_FESTCARD, ptr);
+           smm_festival_nr++;
+          
         //store the parameter set
     }
     fclose(fp);
     printf("Total number of festival cards : %i\n", smm_festival_nr);
+    
+    
     
 #endif   
     
@@ -351,10 +413,33 @@ int main(int argc, const char * argv[]) {
         
         //4-5. next turn
        
-        turn = (turn + 1)&smm_player_nr;
+        turn = (turn + 1)%smm_player_nr;
     }
     
+    printf("\n===== Graduation Result =====\n");
     
+    int i;
+    int j;
+
+    for (i=0;i<smm_player_nr;i++)
+    {
+        if (smm_players[i].flag_graduated)
+         {
+              printf("Graduate: %s\n", smm_players[i].name);
+              printf("Total Credit: %d\n", smm_players[i].credit);
+              printf("Grades:\n");
+
+              int len = smmdb_len(LISTNO_OFFSET_GRADE + i);
+              
+              for (j=0;j<len;j++)
+              {
+                  void *gptr = smmdb_getData(LISTNO_OFFSET_GRADE + i, j);
+                  printf(" %s credit %d grade %s\n", smmObj_getObjectName(gptr), smmObj_getObjectCredit(gptr),
+                   smmObj_getGradeName(smmObj_getObjectGrade(gptr)));
+               }
+         break;
+          }
+     }
     free(smm_players);
     
     system("PAUSE");    
