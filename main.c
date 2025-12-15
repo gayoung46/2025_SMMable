@@ -35,6 +35,8 @@ smm_player_t *smm_players;
 
 void generatePlayers(int n, int initEnergy);
 void printPlayerStatus(void);
+void printGrades(int player);
+
 
 //function prototypes
 #if 0
@@ -43,6 +45,35 @@ float calcAverageGrade(int player); //calculate average grade of the player
 smmGrade_e takeLecture(int player, char *lectureName, int credit); //take the lecture (insert a grade of the player)
 void printGrades(int player); //print all the grade history of the player
 #endif
+
+void printGrades(int player)
+{
+    int size = smmdb_len(LISTNO_OFFSET_GRADE + player);
+    int i;
+
+    printf("\n[Grade history of %s]\n", smm_players[player].name);
+
+    if (size == 0) 
+    {
+        printf("  (no grades yet)\n\n");
+        return;
+    }
+
+    for (i = 0; i < size; i++) 
+    {
+        void *gptr = smmdb_getData(LISTNO_OFFSET_GRADE + player, i);
+
+        printf("  %2d) %s  credit:%d  grade:%d\n",
+               i + 1,
+               smmObj_getObjectName(gptr),
+               smmObj_getObjectCredit(gptr),
+               smmObj_getObjectGrade(gptr));
+    }
+    printf("\n");
+}
+
+
+
 
 void* findGrade(int player, char *lectureName)
 {
@@ -119,8 +150,8 @@ void generatePlayers(int n, int initEnergy)
                smm_players[i].energy = initEnergy; 
                smm_players[i].flag_graduated = 0;
                
-               printf("Input %i-th player name: ");
-               scanf("%s",&smm_players[i].name[0]);
+               printf("Input %i-th player name: ",i+1);
+               scanf("%s",&smm_players[i].name);
                fflush(stdin); 
                
        }    
@@ -148,9 +179,9 @@ void actionNode(int player)
 {
     void *ptr = smmdb_getData(LISTNO_NODE,smm_players[player].pos);
      
-    int type = smmObj_getNodeType(ptr);
-    int credit = smmObj_getNodeCredit(smm_players[player].pos);
-    int energy = smmObj_getNodeEnergy(smm_players[player].pos);
+    int type = smmObj_getObjectType(ptr);
+    int credit = smmObj_getObjectCredit(ptr);
+    int energy = smmObj_getObjectEnergy(ptr);
     int grade;
     void *gradePtr;
     
@@ -289,7 +320,7 @@ int main(int argc, const char * argv[]) {
         fflush(stdin);
         
         if(smm_player_nr <=0 || smm_player_nr > MAX_PLAYER)
-                  pirntf("invaild player number!\n");
+                  printf("invaild player number!\n");
        
     }
     while (smm_player_nr <=0 || smm_player_nr > MAX_PLAYER);
