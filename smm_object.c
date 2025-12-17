@@ -133,7 +133,19 @@ int smmObj_getObjectGrade(void *ptr)
 
 static const char *g_gradeStr[SMMNODE_MAX_GRADE] = 
 {
-    "A+","A0","A-","B+","B0","B-","C+","C0","C-","D+","D0","D-","F"
+    "A+",
+    "A0",
+    "A-",
+    "B+",
+    "B0",
+    "B-",
+    "C+",
+    "C0",
+    "C-",
+    "D+",
+    "D0",
+    "D-",
+    "F"
 };
 
 

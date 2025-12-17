@@ -52,12 +52,12 @@ static node_t* smmList(int list_nr, int index)
     //return for wrong input
     if (index <-1)
     {
-        printf("[ERROR] smmList() : either list is null or index is wrong! (offset : %i)\n", index);
+        printf("list: bad index (%d)\n", index);
         return NULL;
     }
     if (index >= list_cnt[list_nr])
     {
-        printf("[ERROR] smmList() : index is larger than length (len:%i, index:%i)\n", list_cnt[list_nr], index);
+        printf("list: out of range (len=%d, idx=%d)\n", list_cnt[list_nr], index);
         return NULL;
     }
     
@@ -107,7 +107,7 @@ int smmdb_addTail(int list_nr, void* obj)
     //parameter checking
     if (obj == NULL)
     {
-        printf("[ERROR] smmdb_addTail() : Failed to do addTail : input object indicates NULL!\n");
+        printf("addTail: obj is NULL\n");
         return -1;
     }
     
@@ -115,7 +115,7 @@ int smmdb_addTail(int list_nr, void* obj)
     newNdPtr = genNode();
     if (newNdPtr == NULL)
     {
-        printf("[ERROR] smmdb_addTail() : Failed to do addTail : Failed to create a node\n");
+        printf("addTail: node alloc failed\n");
         return -1; //indicate to the upper function that node addition is failed
     }
     newNdPtr->obj = obj;
@@ -156,7 +156,7 @@ int smmdb_deleteData(int list_nr, int index)
     //parameter checking
     if ( (delNdPtr = smmList(list_nr, index)) == NULL)
     {
-        printf("[ERROR] smmdb_deleteData() : Failed to do deleteData : input index is invalid (%i)!\n", index);
+        printf("delete: bad index (%d)\n", index);
         return -1;
     }
     
@@ -219,7 +219,7 @@ void* smmdb_getData(int list_nr, int index)
     }
     
     if (obj == NULL)
-        printf("[ERROR] smmdb_getData() : there is no data of index %i\n", index);
+        printf("get: no item at %d\n", index);
     
     return obj;
 }
