@@ -48,8 +48,8 @@ static const char smmObj_gradeName[SMMNODE_MAX_GRADE][MAX_CHARNAME] = {
 };
 
 static const char smmObj_typeName[MAX_NODETYPE][MAX_CHARNAME] = {
-       "letcture",
-       "restautrant",
+       "lecture",
+       "restaurant",
        "laboratory",
        "home",
        "gotoLab",
