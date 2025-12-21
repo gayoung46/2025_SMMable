@@ -40,6 +40,7 @@ typedef struct {
     int exp_goal;                //dice value required to finish experiment
 } smm_player_t;
 
+
 smm_player_t *smm_players;
 
 
@@ -47,7 +48,6 @@ void generatePlayers(int n, int initEnergy);
 void printPlayerStatus(void);
 void printGrades(int player);
 void printTurnInfo(int player);
-
 
 
 //function prototypes
@@ -59,12 +59,14 @@ void printGrades(int player); //print all the grade history of the player
 #endif
 
 
+
 void printTurnInfo(int player)
 {
     printf("\n");
     printf("-----------------------------------------------------------------------------\n");
     printf("This is %s's turn ::: Press any key to roll a die (press g to see grade):\n", smm_players[player].name);
     printf("-----------------------------------------------------------------------------\n");
+    printf("\n");
 }
 
 
@@ -111,6 +113,7 @@ void* findGrade(int player, char *lectureName)
       return NULL;
 }
 
+
 //check graduation condition
 int isGraduated(void) //check if any player is graduated
 {
@@ -125,6 +128,7 @@ int isGraduated(void) //check if any player is graduated
     
 }
 
+
 //move player and give bonus when passing home
 void goForward(int player, int step)
 { 
@@ -132,8 +136,6 @@ void goForward(int player, int step)
     void *ptr;
     
     int homeEnergy = smmObj_getObjectEnergy(smmdb_getData(LISTNO_NODE, 0));
-    
-    //player_pos[player] = player_pos[player]+ step;
     ptr = smmdb_getData(LISTNO_NODE, smm_players[player].pos);
     
     printf("\n[%s] moving %d step(s) from %d (%s)\n", 
@@ -164,6 +166,7 @@ void goForward(int player, int step)
     printf("\n");
 }
 
+
 void printPlayerStatus(void)
 {
      int i;
@@ -184,6 +187,7 @@ void printPlayerStatus(void)
        }  
      printf("==================== PLAYER STATUS ===========================\n");  
 } 
+
 
 void generatePlayers(int n, int initEnergy)
 {
@@ -226,9 +230,7 @@ int rolldie(int player)
         
         int ch;
         while ((ch = getchar()) != '\n' && ch != EOF) {}
-
-    //fflush(stdin);
-    
+  
 
     if (c == 'g')
         printGrades(player);
@@ -310,8 +312,8 @@ void actionNode(int player)
             }
         }
 
-              break;
-     }
+      break;
+    }
              
 
         case SMMNODE_TYPE_LABORATORY:
@@ -343,8 +345,6 @@ void actionNode(int player)
         }
              
         case SMMNODE_TYPE_HOME:
-             //smm_players[player].energy += energy;
-             
              if(smm_players[player].credit >= GRADUATE_CREDIT)
              {
                   smm_players[player].flag_graduated = 1;
@@ -461,8 +461,6 @@ int main(int argc, const char * argv[]) {
     printf("Total number of board nodes : %i\n", smm_board_nr);
     
     
-    
-#if 1
     //2. food card config 
     if ((fp = fopen(FOODFILEPATH,"r")) == NULL)
     {
@@ -510,10 +508,7 @@ int main(int argc, const char * argv[]) {
     }
     fclose(fp);
     printf("Total number of festival cards : %i\n", smm_festival_nr);
-    
-    
-    
-#endif   
+     
     
     //2. Player configuration ---------------------------------------------------------------------------------
 
@@ -573,6 +568,7 @@ int main(int argc, const char * argv[]) {
            continue;
         }
         
+        //print turn start message and input guide
         printTurnInfo(turn);
         
         //4-2. die rolling (if not in experiment)
